@@ -5,50 +5,49 @@ import (
 	"fmt"
 )
 
-// function commandMapf is responsible for getting a list of locations
-// from the next page of the pokeapi and print them to the console.
-func commandMapf(cfg *config) error {
-	// Makes a call to the pokeapi client to list locations from the next URL
+// commandMapf retrieves a list of `locations` from the next page of
+// the pokeapi and outputs these locations to the console.
+func commandMapf(cfg *config, args ...string) error {
+	// Outgoing API request to the pokeapi client to receive a list of locations
 	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.nextLocationsURL)
 
-	// If the API call returns an error, the function returns the error
+	// Error handling for the API request
 	if err != nil {
 		return err
 	}
 
-	// Updates 'nextLocationsURL' and 'prevLocationsURL' fields of the config
+	// Update the 'nextLocationsURL' and 'prevLocationsURL' fields in the config with the received response
 	cfg.nextLocationsURL = locationsResp.Next
 	cfg.prevLocationsURL = locationsResp.Previous
 
-	// Loops through each location in the results and print its name
+	// Iterate over each location in the response and display its name
 	for _, loc := range locationsResp.Results {
 		fmt.Println(loc.Name)
 	}
 	return nil
 }
 
-// function commandeMapb does almost the same as function commandMapf,
-// but it works in reverse, getting a list of locations from the
-// previous page of the pokeapi and print them to the console.
-func commandMapb(cfg *config) error {
-	// If 'prevLocationsURL' is nil, an error will be returned as there isn't a previous page
+// commandMapb retrieves a list of `locations` from the previous page
+// of the pokeapi and outputs these locations to the console.
+func commandMapb(cfg *config, args ...string) error {
+	// If 'prevLocationsURL' is nil, it implies there are no more previous pages, and hence an error is returned
 	if cfg.prevLocationsURL == nil {
 		return errors.New("you're on the first page")
 	}
 
-	// Makes a call to the pokeapi client to list locations from the previous URL
+	// Outgoing API request to the pokeapi client to receive a list of locations from the previous page
 	locationResp, err := cfg.pokeapiClient.ListLocations(cfg.prevLocationsURL)
 
-	// If the API call returns an error, the function returns the error
+	// Error handling for the API request
 	if err != nil {
 		return err
 	}
 
-	// Updates 'nextLocationsURL' and 'prevLocationsURL' fields of the config
+	// Update the 'nextLocationsURL' and 'prevLocationsURL' fields in the config with the received response
 	cfg.nextLocationsURL = locationResp.Next
 	cfg.prevLocationsURL = locationResp.Previous
 
-	// Loops through each location in the results and print its name
+	// Iterate over each location in the response and display its name
 	for _, loc := range locationResp.Results {
 		fmt.Println(loc.Name)
 	}

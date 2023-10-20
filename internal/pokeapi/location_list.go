@@ -7,30 +7,41 @@ import (
 	"net/http"
 )
 
-// ListLocations makes a GET request to the PokeAPI's location-area endpoint,
-// retrieves a list of location data and unmarshals the received JSON into RespShallowLocations struct.
-//
-// It accepts a pointer to a string as an argument. If this pointer is not nil, it will use
-// the passed string url to make the GET request. Else, it will use the default baseURL + "/location-area"
-//
-// It returns RespShallowLocations as a response or an error if any occurred during the process.
+// ListLocations is a method function attached to Client object.
+// It makes a request to PokeAPI to retrieve list of Pokemon locations.
+// pageURL parameter allows to retrieve a specific page of the Pokemon locations list.
 func (c *Client) ListLocations(pageURL *string) (RespShallowLocations, error) {
+	// building URL for the API request
 	url := baseURL + "/location-area"
 	if pageURL != nil {
 		url = *pageURL
 	}
 
-	// Prepare new GET request
+	// checking if the API response is in the cache
+	if val, ok := c.cache.Get(url); ok {
+		locationsResp := RespShallowLocations{}
+		// unmarshalling the cached response into Go object
+		err := json.Unmarshal(val, &locationsResp)
+		if err != nil {
+			// returning empty response and error if unmarshalling failed
+			return RespShallowLocations{}, err
+		}
+
+		// returning the response from the cache
+		return locationsResp, nil
+	}
+
+	// creating new HTTP request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		// Return zero-value response struct and error
 		return RespShallowLocations{}, err
 	}
 
-	// Execute the request
+	// making the API call
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		// Return zero-value response struct and error
+		// returning empty response and error if API call failed
 		return RespShallowLocations{}, err
 	}
 	// Close response body once all operations finish
@@ -39,19 +50,21 @@ func (c *Client) ListLocations(pageURL *string) (RespShallowLocations, error) {
 	// Read all data from response body
 	dat, err := io.ReadAll(resp.Body)
 	if err != nil {
-		// Return zero-value response struct and error
+		// returning empty response and error if reading body failed
 		return RespShallowLocations{}, err
 	}
 
-	// Prepare response struct
+	// assigned the response to the locationsResp
 	locationsResp := RespShallowLocations{}
 	// Unmarshal JSON data into response struct
 	err = json.Unmarshal(dat, &locationsResp)
 	if err != nil {
-		// Return zero-value response struct and error
+		// returning empty response and error if unmarshalling failed
 		return RespShallowLocations{}, err
 	}
 
-	// Return response and nil (indicating success)
+	// adding the API response to the cache
+	c.cache.Add(url, dat)
+	// returning the API response
 	return locationsResp, nil
 }

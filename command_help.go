@@ -11,7 +11,7 @@ import "fmt"
 //
 // It returns an error, allowing the caller to handle situations
 // where the commands cannot be correctly printed to the console.
-func commandHelp(config *config) error {
+func commandHelp(config *config, args ...string) error {
 	// Blank print to add a new line for neatness
 	fmt.Println()
 
