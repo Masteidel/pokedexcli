@@ -12,6 +12,7 @@ func main() {
 
 	// Setting up configuration where pokeapiClient is the initialized client
 	cfg := &config{
+		caughtPokemon: map[string]pokeapi.Pokemon{},
 		pokeapiClient: pokeClient,
 	}
 

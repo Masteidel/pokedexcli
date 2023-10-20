@@ -13,6 +13,7 @@ type config struct {
 	pokeapiClient    pokeapi.Client // Client for Pokeapi
 	nextLocationsURL *string        // URL of next page of locations
 	prevLocationsURL *string        // URL of previous page of locations
+	caughtPokemon    map[string]pokeapi.Pokemon
 }
 
 // Function to start the REPL
@@ -101,6 +102,11 @@ func getCommands() map[string]cliCommand {
 			name:        "explore <location_name>",
 			description: "Explore a location",
 			callback:    commandExplore,
+		},
+		"catch": { // Catch command details
+			name:        "catch <pokemon_name>",
+			description: "Catch a pokemon",
+			callback:    commandCatch,
 		},
 		"exit": { // Exit command details
 			name:        "exit",
